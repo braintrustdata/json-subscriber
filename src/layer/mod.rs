@@ -2,24 +2,21 @@ use std::{
     borrow::Cow,
     cell::RefCell,
     collections::{BTreeMap, HashMap},
-    fmt,
-    io,
+    fmt, io,
     sync::Arc,
 };
 
 use serde::Serialize;
 use tracing_core::{
     span::{Attributes, Id, Record},
-    Event,
-    Subscriber,
+    Event, Subscriber,
 };
 use tracing_serde::fields::AsMap;
 use tracing_subscriber::{
     fmt::{format::Writer, time::FormatTime, MakeWriter, TestWriter},
     layer::Context,
     registry::{LookupSpan, SpanRef},
-    Layer,
-    Registry,
+    Layer, Registry,
 };
 
 mod event;
@@ -941,11 +938,11 @@ where
     pub fn with_thread_names(&mut self, key: impl Into<String>) -> &mut Self {
         self.keyed_values.insert(
             SchemaKey::from(key.into()),
-            JsonValue::DynamicRawFromEvent(Box::new(|_event, writer| {
-                match std::thread::current().name() {
-                    Some(name) => write_escaped(writer, name),
-                    None => write!(writer, "null"),
-                }
+            JsonValue::DynamicRawFromEvent(Box::new(|_event, writer| match std::thread::current()
+                .name()
+            {
+                Some(name) => write_escaped(writer, name),
+                None => write!(writer, "null"),
             })),
         );
         self
@@ -977,27 +974,30 @@ where
     #[cfg(feature = "opentelemetry")]
     #[cfg_attr(docsrs, doc(cfg(feature = "opentelemetry")))]
     pub fn with_opentelemetry_ids(&mut self, display_opentelemetry_ids: bool) -> &mut Self {
-        use opentelemetry::trace::{TraceContextExt, TraceId};
         use tracing_opentelemetry::OtelData;
 
         if display_opentelemetry_ids {
             self.keyed_values.insert(
-                SchemaKey::from("openTelemetry"),
+                SchemaKey::from("otel"),
                 JsonValue::DynamicFromSpan(Box::new(|span| {
                     span.extensions().get::<OtelData>().and_then(|otel_data| {
                         // We should use the parent first if available because we can create a
                         // new trace and then change the parent. In that case the value in the
                         // builder is not updated.
-                        let mut trace_id = otel_data.parent_cx.span().span_context().trace_id();
-                        if trace_id == TraceId::INVALID {
-                            trace_id = otel_data.builder.trace_id?;
-                        }
-                        let span_id = otel_data.builder.span_id?;
 
-                        Some(serde_json::json!({
-                            "traceId": trace_id.to_string(),
-                            "spanId": span_id.to_string(),
-                        }))
+                        let mut ret = serde_json::map::Map::new();
+                        if let Some(trace_id) = otel_data.builder.trace_id {
+                            ret.insert("trace_id".to_string(), trace_id.to_string().into());
+                        }
+                        if let Some(span_id) = otel_data.builder.span_id {
+                            ret.insert("span_id".to_string(), span_id.to_string().into());
+                        }
+
+                        if ret.is_empty() {
+                            None
+                        } else {
+                            Some(serde_json::Value::Object(ret))
+                        }
                     })
                 })),
             );

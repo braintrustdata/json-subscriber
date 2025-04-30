@@ -11,7 +11,7 @@ readme = "README.md"
 repository = "https://github.com/mladedav/json-subscriber"
 
 [features]
-default = []
+default = ["opentelemetry"]
 tracing-log = ["tracing-subscriber/tracing-log", "dep:tracing-log"]
 env-filter = ["tracing-subscriber/env-filter"]
 opentelemetry = ["dep:tracing-opentelemetry", "dep:opentelemetry", "dep:async-trait"]

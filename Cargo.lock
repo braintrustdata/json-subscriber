@@ -495,6 +495,8 @@ dependencies = [
  "futures-executor",
  "futures-util",
  "opentelemetry 0.27.1",
+ "percent-encoding",
+ "rand",
  "thiserror",
 ]
 
@@ -870,14 +872,14 @@ dependencies = [
 
 [[package]]
 name = "tracing-opentelemetry"
-version = "0.25.0"
+version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a9784ed4da7d921bc8df6963f8c80a0e4ce34ba6ba76668acadd3edbd985ff3b"
+checksum = "97a971f6058498b5c0f1affa23e7ea202057a7301dbff68e968b2d578bcbd053"
 dependencies = [
  "js-sys",
  "once_cell",
- "opentelemetry 0.24.0",
- "opentelemetry_sdk 0.24.1",
+ "opentelemetry 0.27.1",
+ "opentelemetry_sdk 0.27.1",
  "tracing",
  "tracing-core",
  "tracing-subscriber",
